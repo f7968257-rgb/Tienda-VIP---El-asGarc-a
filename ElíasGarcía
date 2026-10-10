@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ElíasGarcía</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+:root{--v:#22c55e;--r:#ff0000;--f:#000000;--b:#ffffff;--g:#888888;--tarjeta:#111811;--error:#ef4444;--dorado:#d4aa00;--barra-fondo:#1a0000}
+body{background:var(--f);color:var(--b);line-height:1.6;max-width:100vw;overflow-x:hidden}
+
+/* ===== PANTALLA DE CARGA ===== */
+.pantalla-carga{position:fixed;top:0;left:0;width:100%;height:100%;background:#000000;z-index:10000;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+.logo-carga{width:70px;height:70px;margin-bottom:25px;position:relative}
+.logo-icon{font-size:60px;color:var(--r)}
+.texto-carga{font-size:18px;color:var(--b);margin-bottom:30px;text-align:center}
+.spinner{width:45px;height:45px;border:3px solid #222;border-top-color:var(--r);border-radius:50%;animation:girar 1s linear infinite}
+@keyframes girar{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+.oculto{display:none !important}
+
+/* ==== RESTO DE ESTILOS ORIGINALES ==== */
+.pantalla-acceso{position:fixed;top:0;left:0;width:100%;height:100%;background:var(--f);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px}
+.caja-acceso{background:var(--tarjeta);border:2px solid var(--r);border-radius:16px;padding:30px;max-width:400px;width:100%;text-align:center}
+.caja-acceso h2{color:var(--r);font-size:22px;margin-bottom:12px}
+.caja-acceso p{color:#aaa;margin-bottom:20px;font-size:15px}
+.input-correo{width:100%;padding:14px;border-radius:8px;border:1px solid #333;background:#1a1a1a;color:white;font-size:15px;margin-bottom:15px;text-align:center}
+.btn-entrar{background:var(--r);color:white;border:none;padding:14px 28px;border-radius:8px;font-size:16px;font-weight:bold;cursor:pointer;width:100%;transition:.2s}
+.btn-entrar:hover{background:#cc0000}
+.texto-error{color:var(--error);font-size:13px;margin-bottom:10px;display:none}
+.cerrar-sesion{background:transparent;border:1px solid #555;color:#aaa;padding:8px 16px;border-radius:6px;cursor:pointer;margin-top:15px;font-size:14px}
+.cerrar-sesion:hover{border-color:var(--error);color:var(--error)}
+.contador-dias{background:rgba(212,170,0,.15);border:1px solid var(--dorado);padding:12px;border-radius:8px;margin:15px 0;font-size:15px;color:var(--dorado)}
+
+/* ==== BARRA SUPERIOR DISEÑO NUEVO ==== */
+header{position:sticky;top:0;background:linear-gradient(90deg,#2b0000,var(--barra-fondo),#2b0000);border-bottom:2px solid var(--r);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;z-index:100;box-shadow:0 2px 20px rgba(255,0,0,.1)}
+.barra-izquierda{display:flex;align-items:center;gap:12px;cursor:pointer}
+.foto-perfil{width:50px;height:50px;border-radius:50%;background:#2a2a2a;display:flex;align-items:center;justify-content:center;font-size:24px;overflow:hidden;border:2px solid var(--r);flex-shrink:0}
+.foto-perfil img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;border-radius:50%}
+.foto-perfil.tiene-foto span{display:none}
+.nombre-usuario{font-size:17px;font-weight:bold;color:var(--b)}
+.nombre-usuario small{font-size:11px;color:#888;display:block;margin-top:2px}
+.barra-derecha{display:flex;align-items:center;gap:10px}
+.btn-dueno{background:linear-gradient(135deg,var(--dorado),#b88600);color:#000;border:none;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:bold;display:flex;align-items:center;gap:4px;cursor:pointer;box-shadow:0 2px 8px rgba(212,170,0,.25);transition:.2s}
+.btn-dueno:hover{transform:scale(1.05)}
+.btn-carrito{background:var(--r);color:white;border:none;padding:10px 14px;border-radius:12px;font-size:18px;cursor:pointer;box-shadow:0 2px 8px rgba(255,0,0,.25);transition:.2s}
+.btn-carrito:hover{background:#cc0000;transform:scale(1.05)}
+.btn-config{background:transparent;border:2px solid #444;color:#aaa;padding:8px 10px;border-radius:10px;font-size:18px;cursor:pointer;transition:.2s}
+.btn-config:hover{border-color:var(--b);color:var(--b)}
+
+.hero{padding:40px 20px 35px;text-align:center;max-width:100%;margin:0 auto}
+.hero h1{font-size:32px;line-height:1.2;margin-bottom:10px}
+.hero h1 span{color:var(--r)}
+.hero p{font-size:15px;color:#888;max-width:450px;margin:0 auto 25px}
+.btn-verde{background:var(--r);color:white;border:none;padding:14px 32px;border-radius:8px;font-size:17px;font-weight:bold;cursor:pointer;text-decoration:none;display:inline-block;transition:.2s;border:2px solid var(--r)}
+.btn-verde:hover{background:#cc0000}
+
+.sec-cat{padding:0 20px 30px;max-width:100%;margin:0 auto}
+.sec-cat h2{font-size:22px;margin-bottom:20px;text-align:center;color:var(--b)}
+.cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-bottom:25px;max-width:400px;margin-left:auto;margin-right:auto}
+.cat-card{background:#1a1a1a;border:2px solid #333;border-radius:12px;padding:25px 15px;text-align:center;cursor:pointer;transition:.2s}
+.cat-card.activo,.cat-card:hover{border-color:var(--r);background:rgba(255,0,0,.05)}
+.cat-icon{font-size:32px;margin-bottom:8px}
+.cat-name{font-size:18px;font-weight:bold;color:var(--r)}
+
+.sec-prod{padding:0 20px 40px;max-width:100%;margin:0 auto}
+.prod-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;max-width:400px;margin:0 auto}
+.prod-card{background:#1a1a1a;border-radius:12px;overflow:hidden;border:1px solid #333;position:relative;transition:.2s}
+.prod-card:hover{border-color:#444}
+.prod-img{width:100%;height:150px;background:#222;display:flex;align-items:center;justify-content:center;font-size:40px;position:relative;overflow:hidden}
+.prod-img img{width:100%;height:100%;object-fit:cover}
+.agotado .prod-img{opacity:.5}
+.prod-body{padding:15px}
+.prod-name{font-size:16px;margin-bottom:8px}
+.precio{font-size:18px;font-weight:bold;color:var(--dorado);margin:8px 0}
+.btn-comprar{width:100%;background:var(--r);color:white;border:none;padding:12px;border-radius:8px;font-size:15px;font-weight:bold;cursor:pointer;transition:.2s;border:2px solid var(--r)}
+.btn-comprar:hover{background:#cc0000}
+.btn-comprar:disabled{background:#333;border-color:#444;cursor:not-allowed;opacity:.5}
+.bloqueado-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;border-radius:12px;z-index:10}
+.texto-bloqueado{color:var(--error);font-weight:bold;font-size:15px;text-align:center;padding:15px}
+
+.btn-editar{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.7);color:white;border:none;padding:5px 8px;border-radius:4px;font-size:12px;cursor:pointer;z-index:10}
+.btn-eliminar{position:absolute;top:8px;left:8px;background:rgba(180,0,0,.9);color:white;border:none;padding:5px 8px;border-radius:4px;font-size:12px;cursor:pointer;z-index:10}
+.btn-editar:hover{background:var(--v)}
+.btn-eliminar:hover{background:red}
+
+footer{background:#111;padding:30px 20px;border-top:1px solid #222;margin-top:40px;text-align:center}
+.foot-redes{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-bottom:15px}
+.red-icon{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#222;transition:.2s;text-decoration:none;font-size:22px;color:var(--b)}
+.red-icon:hover{background:#333}
+.btn-config-redes,.btn-modo-dueño{background:transparent;border:1px solid #444;color:#aaa;padding:8px 16px;border-radius:6px;font-size:13px;cursor:pointer;margin:6px}
+.btn-config-redes:hover,.btn-modo-dueño:hover{border-color:var(--r);color:var(--r)}
+
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.95);z-index:999;align-items:center;justify-content:center;padding:20px}
+.modal.activo{display:flex}
+.modal-box{background:#1a1a1a;border:1px solid #333;border-radius:12px;padding:25px;max-width:360px;width:100%;max-height:90vh;overflow-y:auto}
+.modal-box h3{margin-bottom:20px;color:var(--r);text-align:center;font-size:20px}
+.modal-box label{display:block;margin:12px 0 5px;font-size:14px;color:#ccc;font-weight:bold}
+.modal-box input[type="text"],.modal-box input[type="password"],select{width:100%;background:#222;border:1px solid #444;border-radius:6px;padding:10px;color:white;font-size:14px;margin-bottom:8px}
+.modal-botones{display:flex;gap:10px;margin-top:20px}
+.btn-guardar{background:var(--r);color:white;border:none;padding:10px 20px;border-radius:6px;font-weight:bold;cursor:pointer;flex:1;font-size:15px}
+.btn-cerrar{background:#333;color:#ccc;border:none;padding:10px 20px;border-radius:6px;cursor:pointer;flex:1;font-size:15px}
+.btn-agregar{position:fixed;bottom:25px;right:25px;width:60px;height:60px;background:var(--r);color:white;border:none;border-radius:50%;font-size:28px;cursor:pointer;box-shadow:0 4px 15px rgba(255,0,0,.3);z-index:100;transition:.2s;border:3px solid var(--r)}
+.btn-agregar:hover{transform:scale(1.1)}
+
+.hidden-tab{display:none}
+.hidden-tab.activo{display:block}
+.vista-previa-foto{margin-top:10px;width:80px;height:80px;border-radius:50%;background:#222;display:flex;align-items:center;justify-content:center;font-size:32px;overflow:hidden;border:2px solid var(--dorado);margin-left:auto;margin-right:auto}
+.vista-previa-foto.tiene-imagen img{display:block}
+.vista-previa-foto img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+.texto-ayuda-foto{font-size:12px;color:#888;margin-top:6px;text-align:center;line-height:1.4}
+
+.opcion-pago{background:#222;border:2px solid #333;border-radius:8px;padding:15px;cursor:pointer;margin-bottom:12px;transition:.2s;text-align:center}
+.opcion-pago:hover,.opcion-pago.seleccionado{border-color:var(--r);background:rgba(255,0,0,.1)}
+.opcion-pago strong{display:block;font-size:16px;margin-bottom:5px}
+.opcion-pago span{font-size:13px;color:#888}
+.instrucciones-pago{background:#222;padding:15px;border-radius:8px;margin-top:15px;font-size:14px;line-height:1.6}
+.instrucciones-pago p{margin-bottom:8px}
+</style>
+</head>
+<body>
+
+<!-- ===== PANTALLA DE CARGA ===== -->
+<div class="pantalla-carga" id="pantalla-carga">
+  <div class="logo-carga">
+    <div class="logo-icon">⚡</div>
+  </div>
+  <div class="texto-carga">ElíasGarcía está cargando...</div>
+  <div class="spinner"></div>
+</div>
+
+<div class="oculto" id="pantalla-acceso">
+  <div class="caja-acceso">
+    <h2>🔥 Tienda ElíasGarcía</h2>
+    <p>Escribe tu correo o contraseña de dueño para ingresar</p>
+    <input type="text" id="correo-ingreso" class="input-correo" placeholder="tucorreo@gmail.com o contraseña de dueño">
+    <div class="texto-error" id="mensaje-error">⚠️ Verifica tus datos</div>
+    <button class="btn-entrar" onclick="verificarCorreo()">✅ Entrar</button>
+  </div>
+</div>
+
+<div class="oculto" id="contenido-tienda">
+
+<!-- ===== BARRA SUPERIOR NUEVA ===== -->
+<header>
+  <div class="barra-izquierda" onclick="abrirPerfil()">
+    <div class="foto-perfil" id="foto-usuario">
+      <span>👤</span>
+      <img id="imagen-perfil-personalizada" src="" alt="Foto de perfil">
+    </div>
+    <div>
+      <span class="nombre-usuario" id="nombre-mostrado">ElíasGarcía</span>
+      <small id="email-mostrado"></small>
+    </div>
+  </div>
+  <div class="barra-derecha">
+    <button class="btn-dueno oculto" id="btn-dueno-barra">👑 DUEÑO</button>
+    <button class="btn-carrito">🛒</button>
+    <button class="btn-config" onclick="abrirConfig()">⚙️</button>
+  </div>
+</header>
+
+<section class="hero">
+  <h1>¡Bienvenido, <span>ElíasGarcía</span>!</h1>
+  <p id="texto-bienvenida">Tu lugar de confianza para los mejores productos digitales.</p>
+  <div class="contador-dias" id="caja-contador">
+    ⏱️ Tu acceso: <span id="dias-restantes">♾️ INFINITO</span>
+  </div>
+  <br>
+  <a href="#categorias" class="btn-verde" id="btn-ver-productos">Ver productos →</a>
+</section>
+
+<section class="sec-cat" id="categorias">
+  <h2>Categorías populares</h2>
+  <div class="cat-grid">
+    <div class="cat-card activo" onclick="cambiarTab('paneles',this)">
+      <div class="cat-icon">🔥</div>
+      <div class="cat-name">Paneles</div>
+    </div>
+    <div class="cat-card" onclick="cambiarTab('ebooks',this)">
+      <div class="cat-icon">📖</div>
+      <div class="cat-name">E-books</div>
+    </div>
+    <div class="cat-card" onclick="cambiarTab('otros',this)">
+      <div class="cat-icon">📦</div>
+      <div class="cat-name">Otros</div>
+    </div>
+  </div>
+</section>
+
+<section class="sec-prod" id="contenido-productos">
+</section>
+
+<footer>
+  <div class="foot-redes" id="iconos-redes">
+    <a id="red-whatsapp" href="#" target="_blank" class="red-icon" title="WhatsApp">💬</a>
+    <a id="red-instagram" href="#" target="_blank" class="red-icon" title="Instagram">📷</a>
+  </div>
+  <button class="btn-config-redes" onclick="abrirModalRedes()">🔗 Configurar mis redes sociales</button>
+  <br>
+  <button class="btn-modo-dueño oculto" id="btn-salir-dueño" onclick="salirModoDueño()">👋 Salir de modo DUEÑO</button>
+  <br>
+  <button class="cerrar-sesion" onclick="cerrarSesion()">Cerrar sesión</button>
+</footer>
+
+<button class="btn-agregar oculto" id="btn-agregar-producto" onclick="abrirModalAgregar()">+</button>
+
+</div>
+
+<div class="modal" id="modalPago">
+  <div class="modal-box">
+    <h3>💳 Método de Pago</h3>
+    <p style="text-align:center;color:#888;margin-bottom:20px;">Selecciona cómo quieres pagar</p>
+    
+    <div class="opcion-pago" onclick="seleccionarPago('paypal')" id="opt-paypal">
+      <strong>💵 PayPal</strong>
+      <span>Paga con tu cuenta de PayPal</span>
+    </div>
+    
+    <div class="opcion-pago" onclick="seleccionarPago('deposito')" id="opt-deposito">
+      <strong>🏦 Depósito Bancario</strong>
+      <span>Transfiere a nuestra cuenta</span>
+    </div>
+    
+    <div id="info-pago" style="display:none">
+      <div class="instrucciones-pago" id="contenido-pago"></div>
+      <div class="modal-botones">
+        <button class="btn-cerrar" onclick="cerrarModalPago()">Cancelar</button>
+        <button class="btn-guardar" onclick="confirmarPago()">✅ Ya pagué</button>
+      </div>
+    </div>
+    
+    <div id="botones-iniciales" class="modal-botones" style="justify-content:center;margin-top:10px">
+      <button class="btn-cerrar" onclick="cerrarModalPago()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modalRedes">
+  <div class="modal-box">
+    <h3>🔗 Tus Redes Sociales</h3>
+    <label>💬 WhatsApp</label>
+    <input type="text" id="link-whatsapp" placeholder="Enlace de WhatsApp">
+    <label>📷 Instagram</label>
+    <input type="text" id="link-instagram" placeholder="Enlace de Instagram">
+    <div class="modal-botones">
+      <button class="btn-cerrar" onclick="cerrarModalRedes()">Cancelar</button>
+      <button class="btn-guardar" onclick="guardarRedes()">✅ Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modalPerfil">
+  <div class="modal-box">
+    <h3>✏️ Editar mi perfil</h3>
+    <label>📷 Foto de perfil:</label>
+    <input type="file" id="subir-foto-perfil" accept="image/*">
+    <p class="texto-ayuda-foto">💡 Consejo: Prepara tu foto con forma cuadrada antes de subirla para que se vea perfecta a tu estilo</p>
+    <div class="vista-previa-foto" id="vista-foto-perfil">
+      <span>👤</span>
+      <img id="img-vista-perfil" src="" alt="Vista previa">
+    </div>
+    <label>✏️ Nombre:</label>
+    <input type="text" id="entrada-nombre" placeholder="Tu nombre..." maxlength="25">
+    <div class="modal-botones">
+      <button class="btn-cerrar" onclick="cerrarPerfil()">Cancelar</button>
+      <button class="btn-guardar" onclick="guardarPerfil()">✅ Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modalConfig">
+  <div class="modal-box">
+    <h3>🎨 Cambiar colores</h3>
+    <label>Color principal:</label>
+    <input type="color" id="color-principal" value="#ff0000" oninput="aplicarColor(this.value)">
+    <div class="modal-botones">
+      <button class="btn-cerrar" onclick="cerrarConfig()">Cancelar</button>
+      <button class="btn-guardar" onclick="guardarColor()">✅ Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="modalAgregar">
+  <div class="modal-box">
+    <h3 id="titulo-modal">Agregar Producto</h3>
+    <input type="hidden" id="indice-editar" value="-1">
+    <label>Nombre del producto:</label>
+    <input type="text" id="prod-nombre" placeholder="Nombre del producto">
+    <label>💰 Precio:</label>
+    <input type="text" id="prod-precio" placeholder="$0.00">
+    <label>📷 Imagen del producto:</label>
+    <input type="file" id="prod-foto" accept="image/*">
+    <label>📂 Categoría:</label>
+    <select id="prod-categoria">
+      <option value="paneles">🔥 Paneles</option>
+      <option value="ebooks">📖 E-books</option>
+      <option value="otros">📦 Otros</option>
+    </select>
+    <label>¿Agotado?</label>
+    <select id="prod-agotado">
+      <option value="no">No</option>
+      <option value="si">Sí</option>
+    </select>
+    <div class="modal-botones">
+      <button class="btn-cerrar" onclick="cerrarModalAgregar()">Cancelar</button>
+      <button class="btn-guardar" onclick="guardarProducto()">✅ Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// === MOSTRAR PANTALLA DE CARGA Y LUEGO ENTRAR ===
+window.addEventListener('load', function(){
+  setTimeout(function(){
+    document.getElementById('pantalla-carga').classList.add('oculto')
+    document.getElementById('pantalla-acceso').classList.remove('oculto')
+  }, 2000)
+})
+
+const CONTRASEÑA_DUEÑO = "ElíasGarcía.VIP-9284"
+const DIAS_ACCESO_CLIENTE = 8
+let productos = JSON.parse(localStorage.getItem('tienda-productos')) || []
+let categoriaActiva = 'paneles'
+let esDueño = localStorage.getItem('modo-dueño') === 'true'
+let fechaExpiracion = null
+let productoSeleccionado = null
+
+document.getElementById('subir-foto-perfil').addEventListener('change', function(e){
+  const archivo = e.target.files[0]
+  if(archivo && archivo.type.startsWith('image/')){
+    const lector = new FileReader()
+    lector.onload = function(ev){
+      const resultado = ev.target.result
+      const vistaPrevia = document.getElementById('img-vista-perfil')
+      vistaPrevia.src = resultado
+      document.getElementById('vista-foto-perfil').classList.add('tiene-imagen')
+    }
+    lector.readAsDataURL(archivo)
+  }
+})
+
+document.getElementById('prod-foto').addEventListener('change', function(e){})
+
+function verificarCorreo(){
+  const entrada = document.getElementById('correo-ingreso').value.trim()
+  const error = document.getElementById('mensaje-error')
+  
+  if(entrada === CONTRASEÑA_DUEÑO){
+    esDueño = true
+    localStorage.setItem('modo-dueño', 'true')
+    entrar()
+    document.getElementById('email-mostrado').textContent = '👑 Dueño'
+    document.getElementById('caja-contador').style.display = 'block'
+    document.getElementById('dias-restantes').textContent = '♾️ INFINITO'
+    document.getElementById('btn-dueno-barra').classList.remove('oculto')
+    return
+  }
+  
+  if(!entrada || !entrada.includes('@') || entrada.length < 5){
+    error.style.display = 'block'
+    return
+  }
+  error.style.display = 'none'
+  
+  let datos = JSON.parse(localStorage.getItem('acceso_tienda') || 'null')
+  if(!datos){
+    fechaExpiracion = new Date(Date.now() + DIAS_ACCESO_CLIENTE * 24 * 60 * 60 * 1000)
+    datos = { correo: entrada, expira: fechaExpiracion.toISOString() }
+    localStorage.setItem('acceso_tienda', JSON.stringify(datos))
+  }else{
+    fechaExpiracion = new Date(datos.expira)
+    if(new Date() >= fechaExpiracion && !esDueño){
+      alert('⚠️ Acceso expirado')
+      return
+    }
+  }
+  entrar()
+}
+
+function entrar(){
+  document.getElementById('pantalla-acceso').classList.add('oculto')
+  document.getElementById('contenido-tienda').classList.remove('oculto')
+  renderizarProductos()
+  cargarDatosGuardados()
+  aplicarEnlacesRedes()
+  actualizarVistaModo()
+}
+
+function cerrarSesion(){
+  localStorage.removeItem('acceso_tienda')
+  localStorage.removeItem('modo-dueño')
+  location.reload()
+}
+
+function actualizarVistaModo(){
+  document.getElementById('btn-dueno-barra').classList.toggle('oculto', !esDueño)
+  document.getElementById('btn-salir-dueño').classList.toggle('oculto', !esDueño)
+  document.getElementById('btn-agregar-producto').classList.toggle('oculto', !esDueño)
+}
+
+function salirModoDueño(){
+  esDueño = false
+  localStorage.removeItem('modo-dueño')
+  location.reload()
+}
+
+function abrirModalRedes(){
+  document.getElementById('modalRedes').classList.add('activo')
+  const redes = JSON.parse(localStorage.getItem('redes-sociales') || '{}')
+  document.getElementById('link-whatsapp').value = redes.whatsapp || ''
+  document.getElementById('link-instagram').value = redes.instagram || ''
+}
+function cerrarModalRedes(){ document.getElementById('modalRedes').classList.remove('activo') }
+function guardarRedes(){
+  const redes = {
+    whatsapp: document.getElementById('link-whatsapp').value.trim(),
+    instagram: document.getElementById('link-instagram').value.trim()
+  }
+  localStorage.setItem('redes-sociales', JSON.stringify(redes))
+  aplicarEnlacesRedes()
+  cerrarModalRedes()
+}
+function aplicarEnlacesRedes(){
+  const redes = JSON.parse(localStorage.getItem('redes-sociales') || '{}')
+  const wa = document.getElementById('red-whatsapp')
+  const ig = document.getElementById('red-instagram')
+  wa.href = redes.whatsapp || '#'
+  wa.style.pointerEvents = redes.whatsapp ? 'auto' : 'none'
+  ig.href = redes.instagram || '#'
+  ig.style.pointerEvents = redes.instagram ? 'auto' : 'none'
+}
+
+function abrirPerfil(){
+  document.getElementById('modalPerfil').classList.add('activo')
+  const nombreGuardado = localStorage.getItem('usuario-nombre')
+  if(nombreGuardado) document.getElementById('entrada-nombre').value = nombreGuardado
+  const fotoGuardada = localStorage.getItem('usuario-foto')
+  if(fotoGuardada){
+    document.getElementById('img-vista-perfil').src = fotoGuardada
+    document.getElementById('vista-foto-perfil').classList.add('tiene-imagen')
+  }
+}
+function cerrarPerfil(){
+  document.getElementById('modalPerfil').classList.remove('activo')
+  document.getElementById('subir-foto-perfil').value = ''
+  document.getElementById('img-vista-perfil').src = ''
+  document.getElementById('vista-foto-perfil').classList.remove('tiene-imagen')
+}
+
+function guardarPerfil(){
+  const nombre = document.getElementById('entrada-nombre').value.trim()
+  const archivo = document.getElementById('subir-foto-perfil').files[0]
+  
+  if(nombre){
+    document.getElementById('nombre-mostrado').textContent = nombre
+    localStorage.setItem('usuario-nombre', nombre)
+  }
+  
+  if(archivo && archivo.type.startsWith('image/')){
+    const lector = new FileReader()
+    lector.onload = function(ev){
+      const resultado = ev.target.result
+      localStorage.setItem('usuario-foto', resultado)
+      const fotoPerfil = document.getElementById('imagen-perfil-personalizada')
+      fotoPerfil.src = resultado
+      fotoPerfil.parentElement.classList.add('tiene-foto')
+      cerrarPerfil()
+    }
+    lector.readAsDataURL(archivo)
+  }else{
+    cerrarPerfil()
+  }
+}
+
+function abrirConfig(){ document.getElementById('modalConfig').classList.add('activo') }
+function cerrarConfig(){ document.getElementById('modalConfig').classList.remove('activo') }
+function aplicarColor(c){ document.documentElement.style.setProperty('--r', c) }
+function guardarColor(){
+  const c = document.getElementById('color-principal').value
+  localStorage.setItem('color-tema', c)
+  aplicarColor(c)
+  cerrarConfig()
+}
+
+function cargarDatosGuardados(){
+  const nombreGuardado = localStorage.getItem('usuario-nombre')
+  if(nombreGuardado) document.getElementById('nombre-mostrado').textContent = nombreGuardado
+  
+  const fotoGuardada = localStorage.getItem('usuario-foto')
+  if(fotoGuardada){
+    const fotoPerfil = document.getElementById('imagen-perfil-personalizada')
+    fotoPerfil.src = fotoGuardada
+    fotoPerfil.parentElement.classList.add('tiene-foto')
+  }
+  
+  const colorGuardado = localStorage.getItem('color-tema')
+  if(colorGuardado) aplicarColor(colorGuardado)
+}
+
+function cambiarTab(id, el){
+  document.querySelectorAll('.cat-card').forEach(c=>c.classList.remove('activo'))
+  el.classList.add('activo')
+  categoriaActiva = id
+  renderizarProductos()
+}
+
+function abrirModalPago(i){
+  productoSeleccionado = i
+  document.getElementById('modalPago').classList.add('activo')
+  document.getElementById('info-pago').style.display = 'none'
+  document.getElementById('botones-iniciales').style.display = 'flex'
+  document.getElementById('opt-paypal').classList.remove('seleccionado')
+  document.getElementById('opt-deposito').classList.remove('seleccionado')
+}
+
+function cerrarModalPago(){
+  document.getElementById('modalPago').classList.remove('activo')
+  productoSeleccionado = null
+}
+
+function seleccionarPago(metodo){
+  document.getElementById('opt-paypal').classList.remove('seleccionado')
+  document.getElementById('opt-deposito').classList.remove('seleccionado')
+  document.getElementById('botones-iniciales').style.display = 'none'
+  document.getElementById('info-pago').style.display = 'block'
+  
+  const contenido = document.getElementById('contenido-pago')
+  
+  if(metodo === 'paypal'){
+    document.getElementById('opt-paypal').classList.add('seleccionado')
+    contenido.innerHTML = `
+      <p><strong>💵 PayPal</strong></p>
+      <p>Envia el pago a nuestra cuenta de PayPal:</p>
+      <p style="color:var(--r);font-weight:bold;">tu-correo@paypal.com</p>
+      <p>Una vez realizado el pago, presiona "Ya pagué" y te enviaremos tu producto.</p>
+    `
+  }else if(metodo === 'deposito'){
+    document.getElementById('opt-deposito').classList.add('seleccionado')
+    contenido.innerHTML = `
+      <p><strong>🏦 Depósito Bancario</strong></p>
+      <p>Realiza tu depósito a:</p>
+      <p><strong>Banco:</strong> Tu Banco</p>
+      <p><strong>Cuenta:</strong> 1234567890</p>
+      <p><strong>Nombre:</strong> ElíasGarcía</p>
+      <p>Envia tu comprobante y te entregamos tu producto.</p>
+    `
+  }
+}
+
+function confirmarPago(){
+  alert('✅ ¡Gracias por tu pago! Te contactaremos pronto con tu producto.')
+  cerrarModalPago()
+}
+
+function renderizarProductos(){
+  const contenedor = document.getElementById('contenido-productos')
+  const expirado = fechaExpiracion && new Date() >= fechaExpiracion && !esDueño
+  const cats = {
+    paneles:{titulo:'🔥 Paneles'},
+    ebooks:{titulo:'📖 E-books'},
+    otros:{titulo:'📦 Otros'}
+  }
+  let html = ''
+  for(let cat in cats){
+    const filtrados = productos.filter(p=>p.categoria===cat)
+    html += `
+    <div class="hidden-tab ${cat===categoriaActiva?'activo':''}" id="${cat}">
+      <h3 style="font-size:18px;margin-bottom:15px;color:var(--r)">${cats[cat].titulo}</h3>
+      <div class="prod-grid">
+        ${filtrados.length===0?'<p style="color:#666;text-align:center;padding:30px">No hay productos aún</p>':''}
+        ${filtrados.map((p,i)=>`
+        <div class="prod-card">
+          ${expirado&&!esDueño?'<div class="bloqueado-overlay"><div class="texto-bloqueado">🔒 ACCESO EXPIRADO</div></div>':''}
+          ${esDueño?`<button class="btn-eliminar" onclick="eliminarProducto(${i})">🗑️</button><button class="btn-editar" onclick="editarProducto(${i})">✏️</button>`:''}
+          <div class="prod-img">${p.imagen?`<img src="${p.imagen}" alt="${p.nombre}">`:'📦'}</div>
+          <div class="prod-body">
+            <div class="prod-name">${p.nombre}</div>
+            <div class="precio">${p.precio || 'Gratis'}</div>
+            <button class="btn-comprar" ${expirado&&!esDueño?'disabled':''} onclick="${esDueño?'alert(\'✅ Producto disponible\')':'abrirModalPago('+i+')'}">${esDueño?'✅ Disponible':'🛒 Comprar'}</button>
+          </div>
+        </div>
+        `).join('')}
+      </div>
+    </div>`
+  }
+  contenedor.innerHTML = html
+}
+
+function abrirModalAgregar(){
+  document.getElementById('modalAgregar').classList.add('activo')
+  document.getElementById('titulo-modal').textContent = 'Agregar Producto'
+  document.getElementById('indice-editar').value = '-1'
+  document.getElementById('prod-nombre').value = ''
+  document.getElementById('prod-precio').value = ''
+  document.getElementById('prod-categoria').value = 'paneles'
+  document.getElementById('prod-agotado').value = 'no'
+  document.getElementById('prod-foto').value = ''
+}
+function cerrarModalAgregar(){ document.getElementById('modalAgregar').classList.remove('activo') }
+
+function editarProducto(i){
+  const p = productos[i]
+  document.getElementById('modalAgregar').classList.add('activo')
+  document.getElementById('titulo-modal').textContent = 'Editar Producto'
+  document.getElementById('indice-editar').value = i
+  document.getElementById('prod-nombre').value = p.nombre
+  document.getElementById('prod-precio').value = p.precio
+  document.getElementById('prod-categoria').value = p.categoria
+  document.getElementById('prod-agotado').value = 'no'
+}
+function eliminarProducto(i){
+  if(confirm('¿Eliminar producto?')){
+    productos.splice(i,1)
+    localStorage.setItem('tienda-productos', JSON.stringify(productos))
+    renderizarProductos()
+  }
+}
+function guardarProducto(){
+  const nombre = document.getElementById('prod-nombre').value.trim()
+  const precio = document.getElementById('prod-precio').value.trim()
+  const categoria = document.getElementById('prod-categoria').value
+  const i = parseInt(document.getElementById('indice-editar').value)
+  const archivo = document.getElementById('prod-foto').files[0]
+  
+  if(!nombre){alert('Escribe el nombre del producto');return}
+  
+  const guardar = (img=null) => {
+    const prod = {nombre,precio,categoria,imagen:img}
+    if(i>=0) productos[i]=prod
+    else productos.push(prod)
+    localStorage.setItem('tienda-productos', JSON.stringify(productos))
+    renderizarProductos()
+    cerrarModalAgregar()
+  }
+  
+  if(archivo && archivo.type.startsWith('image/')){
+    const lector = new FileReader()
+    lector.onload = e => guardar(e.target.result)
+    lector.readAsDataURL(archivo)
+  }else{
+    guardar(i>=0?productos[i].imagen:null)
+  }
+}
+
+const sesionActiva = localStorage.getItem('acceso_tienda')
+if(sesionActiva){
+  const datos = JSON.parse(sesionActiva)
+  fechaExpiracion = new Date(datos.expira)
+  if(new Date() < fechaExpiracion || esDueño){
+    entrar()
+  }
+}
+</script>
+
+</body>
+</html>
